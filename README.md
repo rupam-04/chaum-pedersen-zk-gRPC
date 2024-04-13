@@ -13,3 +13,9 @@ Verification: The verifier checks if ```g^s mod p``` equals ```t * y^c mod p```.
 The protocol is zero-knowledge because the verifier learns nothing about the prover's secret x from the proof. The protocol is also interactive and requires the prover and verifier to exchange several messages.
 
 The Chaum-Pedersen protocol is based on the hardness of the Discrete Logarithm Problem (DLP). It assumes that it's computationally infeasible to compute ```x``` given ```g```, ```p```, and ```g^x mod p```, which ensures the security of the protocol.
+
+
+You can run the tests using:
+```
+cargo test
+```
