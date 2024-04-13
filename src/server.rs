@@ -1,6 +1,7 @@
 use tonic::{transport::Server, Code, Request, Response, Status, codegen::http::request};
 use num_bigint::BigUint;
 use std::{collections::HashMap, sync::Mutex};
+use chaum_pedersen::ZKP;
 
 pub mod zkp_auth {
     include!("./zkp_auth.rs");
@@ -12,6 +13,7 @@ use zkp_auth::{auth_server::{Auth, AuthServer}, RegisterRequest, RegisterRespons
 
 pub struct AuthImpl {
     pub user_info: Mutex<HashMap<String, UserInfo>>,
+    pub auth_id_to_user: Mutex<HashMap<String, String>>
 }
 
 #[derive(Debug, Default)]
@@ -51,7 +53,29 @@ impl Auth for AuthImpl {
     }
 
     async fn authentication_challenge(&self, request: Request<AuthenticationChallengeRequest>) -> Result<Response<AuthenticationChallengeResponse>, Status> {
-        todo!()
+        println!("Processing authentication_challenge: {:?}", request);
+
+        let request = request.into_inner();
+
+        let user_name = request.user;
+        let mut user_info_hashmap = &mut self.user_info.lock().unwrap();
+
+        if let Some(user_info) = user_info_hashmap.get_mut(&user_name) {
+            user_info.r1 = BigUint::from_bytes_be(&request.r1);
+            user_info.r2 = BigUint::from_bytes_be(&request.r2);
+
+            let (_, _, _, q) = ZKP::get_constants();
+            let c = ZKP::generate_random_below(&q);
+            let auth_id = "skdjfsk".to_string();
+
+            let mut auth_id_to_user = &mut self.auth_id_to_user.lock().unwrap();
+            auth_id_to_user.insert(auth_id.clone(), user_name);
+
+            Ok(Response::new(AuthenticationChallengeResponse {auth_id, c: c.to_bytes_be()}))
+        }
+        else {
+            Err(Status::new(Code::NotFound, format!("User: {} not found in database", user_name)))
+        }
     }
 
     async fn verify_authentication(&self, request: Request<AuthenticationAnswerRequest>) -> Result<Response<AuthenticationAnswerResponse>, Status> {
