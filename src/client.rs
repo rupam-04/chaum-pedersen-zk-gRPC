@@ -4,7 +4,7 @@ use num_bigint::BigUint;
 pub mod zkp_auth {
     include!("./zkp_auth.rs");
 }
-use tonic::Response;
+
 use zkp_auth::{auth_client::AuthClient, RegisterRequest};
 use chaum_pedersen::ZKP;
 

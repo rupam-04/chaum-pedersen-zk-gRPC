@@ -73,22 +73,22 @@ mod test {
         
         let c = BigUint::from(4u32);
 
-        let y1 = ZKP::exponentiate(&alpha, &x, &p);
-        let y2 = ZKP::exponentiate(&beta, &x, &p);
+        let y1 = ZKP::exponentiate(&alpha, &x, &p); // alpha^x mod p
+        let y2 = ZKP::exponentiate(&beta, &x, &p); // beta^x mod p
 
         assert_eq!(y1, BigUint::from(2u32));
         assert_eq!(y2, BigUint::from(3u32));
 
-        let r1 = ZKP::exponentiate(&alpha, &k, &p);
-        let r2 = ZKP::exponentiate(&beta, &k, &p);
+        let r1 = ZKP::exponentiate(&alpha, &k, &p); // alpha^k mod p
+        let r2 = ZKP::exponentiate(&beta, &k, &p); // beta^k mod p
 
         assert_eq!(r1, BigUint::from(8u32));
         assert_eq!(r2, BigUint::from(4u32));
 
-        let s = zkp.solve(&k, &c, &x);
+        let s = zkp.solve(&k, &c, &x); // s = k-cx mod q
         assert_eq!(s, BigUint::from(5u32));
 
-        let result = zkp.verify(&r1, &r2, &y1, &y2, &c, &s);
+        let result = zkp.verify(&r1, &r2, &y1, &y2, &c, &s); 
         assert!(result);
 
         // fake secret

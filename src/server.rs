@@ -1,4 +1,4 @@
-use tonic::{transport::Server, Code, Request, Response, Status, codegen::http::request};
+use tonic::{transport::Server, Code, Request, Response, Status};
 use num_bigint::BigUint;
 use std::{collections::HashMap, sync::Mutex};
 use chaum_pedersen::ZKP;
@@ -46,7 +46,7 @@ impl Auth for AuthImpl {
         user_info.y1 = BigUint::from_bytes_be(&request.y1);
         user_info.y2 = BigUint::from_bytes_be(&request.y2);
         
-        let mut user_info_hashmap = &mut self.user_info.lock().unwrap();
+        let user_info_hashmap = &mut self.user_info.lock().unwrap();
         user_info_hashmap.insert(user_name, user_info);
         
         Ok(Response::new(RegisterResponse {}))
@@ -58,7 +58,7 @@ impl Auth for AuthImpl {
         let request = request.into_inner();
 
         let user_name = request.user;
-        let mut user_info_hashmap = &mut self.user_info.lock().unwrap();
+        let user_info_hashmap = &mut self.user_info.lock().unwrap();
 
         if let Some(user_info) = user_info_hashmap.get_mut(&user_name) {
             let (_, _, _, q) = ZKP::get_constants();
@@ -69,7 +69,7 @@ impl Auth for AuthImpl {
             user_info.r2 = BigUint::from_bytes_be(&request.r2);
             user_info.c = c.clone();
 
-            let mut auth_id_to_user = &mut self.auth_id_to_user.lock().unwrap();
+            let auth_id_to_user = &mut self.auth_id_to_user.lock().unwrap();
             auth_id_to_user.insert(auth_id.clone(), user_name);
 
             Ok(Response::new(AuthenticationChallengeResponse {auth_id, c: c.to_bytes_be()}))
@@ -85,10 +85,10 @@ impl Auth for AuthImpl {
         let request = request.into_inner();
 
         let auth_id = request.auth_id;
-        let mut auth_id_to_user_hashmap = &mut self.auth_id_to_user.lock().unwrap();
+        let auth_id_to_user_hashmap = &mut self.auth_id_to_user.lock().unwrap();
 
         if let Some(user_name) = auth_id_to_user_hashmap.get(&auth_id) {
-            let mut user_info_hashmap = &mut self.user_info.lock().unwrap();
+            let user_info_hashmap = &mut self.user_info.lock().unwrap();
             let user_info = user_info_hashmap.get_mut(user_name).expect("auth id not found on hashmap");
 
             let s = BigUint::from_bytes_be(&request.s);
