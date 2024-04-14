@@ -27,6 +27,8 @@ e84736012f9a   zkp-course-zkpserver   "bash"    20 minutes ago   Up 20 minutes  
 $ docker exec -it e84736012f9a /bin/bash
 ```
 
+Make sure your Docker daemon is running.
+
 Run the client:
 
 ```
